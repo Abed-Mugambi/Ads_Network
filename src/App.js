@@ -1,24 +1,46 @@
-import logo from './logo.svg';
 import './App.css';
+import {BrowserRouter, Route, Routes} from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Register from './pages/auth/Register';
+import Login from './pages/auth/Login';
+import ForgotPassword from './pages/auth/ForgotPassword'
+import ResetPassword from './pages/auth/ResetPassword';
+import Home from './pages/Home';
+import Profile from './pages/Profile'
+import AuthProvider from './context/auth';
+import PrivateRoute from './components/PrivateRoute';
+import Sell from './pages/Sell';
+import MyFavorites from "./pages/MyFavorites";
+import Ad from "./pages/Ad";
 
-function App() {
+function App() { 
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <AuthProvider>
+
+      <BrowserRouter>
+      <Navbar />
+      <Routes>
+
+        <Route element={<PrivateRoute />}>
+            <Route path="/sell" element={<Sell />} />
+            <Route path="/favorites" element={<MyFavorites />} />
+        </Route>
+
+        <Route path="/auth/register" element={<Register />}  />
+        <Route path="/auth/login" element={<Login />}  />
+        <Route path="/auth/forgot-password" element={<ForgotPassword />}  />
+        <Route path="/auth/reset-password" element={<ResetPassword />}  />
+        <Route path="/profile/:id" element={<Profile />}  />
+        <Route path="/:category/:id" element={<Ad />} />
+        <Route path="/" element={<Home />}  />
+      </Routes>
+      
+      </BrowserRouter>
+
+    </AuthProvider>
+
+     
+    
   );
 }
 
