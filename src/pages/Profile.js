@@ -1,11 +1,15 @@
 import React, {useEffect, useState} from 'react'
 import { useParams } from 'react-router-dom';
-import {QuerySnapshot, doc, onSnapshot, updateDoc} from 'firebase/firestore';
+import {QuerySnapshot, doc, onSnapshot, orderBy, updateDoc} from 'firebase/firestore';
 import { deleteObject, getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { db, storage, auth } from '../firebaseConfig';
 import {FaUserAlt} from 'react-icons/fa'
 import {FaCloudUploadAlt} from 'react-icons/fa'
 import moment from 'moment';
+import {collection, getDocs, query, where} from 'firebase/firestore';
+import AdCard from '../components/AdCard';
+import useSnapshot from "../utils/useSnapshot";
+
 
 
 const monthAndYear = date => 
@@ -13,19 +17,22 @@ const monthAndYear = date =>
 
 const Profile = () => {
     const { id } = useParams();
-    const [user, setUser] = useState();
+    // const [user, setUser] = useState();
     const [img, setImg]= useState("");
+    const [ads, setAds] = useState([]);
 
-    const getUser = async () => {
-    //   const docSnap =   await getDoc(doc(db, 'users', id))
-    //   if(docSnap.exists()) {
-    //     setUser(docSnap.data());
-    //   }
-    const unsub = onSnapshot(doc(db, 'users', id), 
-    querySnapshot => setUser(querySnapshot.data()))
+    const  { val:user }= useSnapshot("users", id);
 
-    return () => unsub();
-    };
+    // const getUser = async () => {
+    // //   const docSnap =   await getDoc(doc(db, 'users', id))
+    // //   if(docSnap.exists()) {
+    // //     setUser(docSnap.data());
+    // //   }
+    // const unsub = onSnapshot(doc(db, 'users', id), 
+    // querySnapshot => setUser(querySnapshot.data()))
+
+    // return () => unsub();
+    // };
 
    
 
@@ -48,11 +55,27 @@ const Profile = () => {
         setImg("");
     };
 
+    const getAds = async () =>{
+        // create collection ref
+        const adsRef = collection(db, 'ads')
+        // execute query
+        const q = query(adsRef, where('postedBy', '==', id), orderBy('publishedAt', 'desc'))
+        // get data frm db
+        const docs = await getDocs(q);
+        let ads =[]
+        docs.forEach(doc => {
+            ads.push({...doc.data(), id: doc.id})
+        });
+        setAds(ads);
+    }
+
     useEffect(() => {
-        getUser();
+        // getUser();
         if (img) {
             uploadImage();
         }
+        getAds();
+        // console.log(ads);
     }, [img]);
 
     const deletePhoto= async () => {
@@ -119,6 +142,13 @@ const Profile = () => {
         <div className='col-sm-10 col-md-9'>
             <h3>{user.name}</h3>
             <hr />
+
+            {ads.length ? (<h4>Published ADS</h4>) : (<h4>There are NO ads published by this user</h4>) }
+            <div className='row'>
+                {ads?.map(ad => <div key={ad.id} className='col-sm-6 col-md-4 mb-3'> 
+                <AdCard ad={ad} />
+                </div> )}
+            </div>
 
         </div>
     

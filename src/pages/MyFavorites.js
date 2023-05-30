@@ -27,6 +27,7 @@ const MyFavorites = () => {
       const q = query(adsRef, where(documentId(), "==", doc.id));
       promises.push(getDocs(q));
     });
+    
     let ads = [];
     const docs = await Promise.all(promises);
     docs.forEach((querySnap) =>

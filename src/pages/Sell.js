@@ -62,6 +62,10 @@ const Sell = () => {
             postedBy: auth.currentUser.uid,
         });
 
+        await setDoc(doc(db, "favorites", result.id), {
+            users: []
+        })
+
         setValues({
             images: [],
              title:"",
